@@ -1,4 +1,7 @@
 # Terrain Generation Tool
+
+For transient RFT sand and its browser contact-envelope display, see [sand/README.md](sand/README.md).
+
 ## Usage
 1. First, install dependencies:
 ```bash

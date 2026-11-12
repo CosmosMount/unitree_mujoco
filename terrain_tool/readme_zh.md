@@ -1,5 +1,7 @@
 #  地形生成工具
 
+瞬态 RFT 沙地和浏览器接触包络显示见 [sand/README.md](sand/README.md)。
+
 ## 使用
 1. 首先安装依赖
 ```bash
