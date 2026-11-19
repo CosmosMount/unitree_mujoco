@@ -60,7 +60,7 @@ class ViserSand:
     def __init__(self, sand, data, server):
         self.surface = SoilSurface(sand)
         self.data, self.server = data, server
-        self.handle = None
+        self.handle = self.contact = None
         self.last_time = None
         self.last_draw = 0.
         self.last_revision = None
@@ -76,6 +76,8 @@ class ViserSand:
         visible = viewer_scene.geom_groups_visible[1]
         if self.handle is not None:
             self.handle.visible = visible
+        if self.contact is not None:
+            self.contact.visible = visible and len(self.contact.faces) > 0
         revision = self.surface.sand.revision
         geom_ids = self.surface.sand.geom_ids
         pose = np.concatenate((self.data.geom_xpos[geom_ids].ravel(), self.data.geom_xmat[geom_ids].ravel()))
@@ -97,8 +99,30 @@ class ViserSand:
                 self.handle.vertices = vertices
                 self.handle.faces = faces
             self.handle.visible = visible
+            self._draw_contact(vertices, faces, visible)
             self.depth.value = round(100 * depth, 2)
         self.last_time = self.data.time
         self.last_draw = now
         self.last_revision = revision
         self.last_pose = pose
+
+    def _draw_contact(self, vertices, faces, visible):
+        submerged = vertices[:, 2] < self.surface.sand.surface_z - .002
+        faces = faces[submerged[faces].all(axis=1)]
+        if not len(faces):
+            if self.contact is not None:
+                self.contact.faces = faces
+                self.contact.visible = False
+            return
+        indices, inverse = np.unique(faces, return_inverse=True)
+        patch = vertices[indices]
+        patch[:, 2] += .001  # Offset only the tint to avoid z-fighting with the surface.
+        faces = inverse.reshape(-1, 3).astype(np.uint32)
+        if self.contact is None:
+            self.contact = self.server.scene.add_mesh_simple(
+                "/fixed_bodies/sand_contact_tint", patch, faces,
+                color=(150, 105, 60), side="double", cast_shadow=False, receive_shadow=False)
+        else:
+            self.contact.vertices = patch
+            self.contact.faces = faces
+        self.contact.visible = visible

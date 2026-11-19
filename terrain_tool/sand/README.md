@@ -13,7 +13,7 @@ python -m pip install numpy mujoco 'mjviser==0.0.14' 'viser==1.1.0'
 python -m terrain_tool.sand
 ```
 
-打开终端显示的 `http://127.0.0.1:8080`。浏览器提供暂停、单步、重置、关键帧及视角/模型分组控制；沙面对应 geom group 1，刷新上限为 20 Hz。可通过 `--port 端口`、`--scene 路径`、`--soil-size 米`、`--surface-z 米`、`--depth 米` 和 `--timestep 秒` 调整参数。默认只监听本机，如需在可信网络远程查看可显式指定 `--host 0.0.0.0`。
+打开终端显示的 `http://127.0.0.1:8080`。浏览器提供暂停、单步、重置、关键帧及视角/模型分组控制。沙面对应 geom group 1，刷新上限为 20 Hz。采样网格内下陷超过 2 mm 的区域标为深色，右侧显示当前最大下陷深度。可通过 `--port 端口`、`--scene 路径`、`--soil-size 米`、`--surface-z 米`、`--depth 米` 和 `--timestep 秒` 调整参数。默认只监听本机，如需在可信网络远程查看可显式指定 `--host 0.0.0.0`。
 
 默认没有控制器，Go2 会在重力下倒下；浏览器显示不等于控制器验证。要通过已有 Unitree SDK2 Python bridge 使用控制程序，先按仓库主 README 安装 `unitree_sdk2py`、CycloneDDS 和 pygame，检查 `simulate_python/config.py` 中的 DDS 域、接口、机器人类型及手柄配置，再运行：
 

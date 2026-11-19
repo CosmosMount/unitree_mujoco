@@ -193,8 +193,10 @@ def test_viser_callback_refreshes_paused_edits_and_visibility(monkeypatch):
                                        add_markdown=lambda *a, **k: None)
             self.scene = SimpleNamespace(add_mesh_simple=self.add_mesh)
         def add_mesh(self, name, vertices, faces, **kwargs):
-            self.handle = SimpleNamespace(vertices=vertices, faces=faces, visible=True)
-            return self.handle
+            handle = SimpleNamespace(vertices=vertices, faces=faces, visible=True)
+            if name.endswith("sand_contact_surface"):
+                self.handle = handle
+            return handle
         def atomic(self):
             return contextlib.nullcontext()
     server, scene = Server(), Scene()
@@ -207,13 +209,15 @@ def test_viser_callback_refreshes_paused_edits_and_visibility(monkeypatch):
     data.qpos[2] = .045  # paused pose edit must bypass the wall-time throttle
     draw(scene)
     assert server.handle.vertices.shape[0] > 4 and draw.depth.value > 0
+    assert draw.contact.visible and len(draw.contact.faces) > 0
     scene.geom_groups_visible[1] = False
     draw(scene)
-    assert not server.handle.visible and scene.calls == 3
+    assert not server.handle.visible and not draw.contact.visible and scene.calls == 3
     data.qpos[2] = .2
     sand.reset()
     draw(scene)
     assert server.handle.vertices.shape == (4, 3) and draw.depth.value == 0
+    assert not draw.contact.visible and len(draw.contact.faces) == 0
 
 
 def test_go2_sand_scene_runs_without_rigid_ground():
